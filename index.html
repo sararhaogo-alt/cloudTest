@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AWS 클라우드 아키텍처 시뮬레이터 Pro | 고등학교 정보·클라우드 컴퓨팅 실습</title>
+  <meta name="description" content="고등학생을 위한 인터랙티브 AWS 클라우드 아키텍처 시뮬레이터. 트래픽과 데이터 규모, CDN, 인메모리 캐시, WAF 방화벽, Multi-AZ 등을 실시간 실험하고 시각화합니다.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- 네비게이션 헤더 -->
+  <header class="navbar" id="appHeader">
+    <div class="nav-container">
+      <div class="brand">
+        <div class="aws-logo-box">
+          <span class="aws-brand-text">aws</span>
+          <span class="aws-smile-curve"></span>
+        </div>
+        <div class="brand-titles">
+          <h1 class="main-title">AWS 클라우드 아키텍처 시뮬레이터 <span class="version-tag">Pro</span></h1>
+          <span class="sub-badge">고교 정보 · 클라우드 시스템 구성 및 엔터프라이즈 실습</span>
+        </div>
+      </div>
+      <div class="nav-actions">
+        <a href="challenge.html" class="nav-btn challenge-nav-btn" style="text-decoration:none; display:flex; align-items:center; gap:0.35rem; background:linear-gradient(135deg, #FF9900, #E68A00); color:#111827; font-weight:800; border:none; box-shadow:0 2px 10px rgba(255,153,0,0.3);"><span>🎯</span> 아키텍처 실기 TEST</a>
+        <button id="soundToggleBtn" class="nav-btn" title="효과음 켜기/끄기">🔇 효과음 끔</button>
+        <button id="openCatalogBtn" class="nav-btn tech-btn">📖 AWS 11대 서비스 도감</button>
+        <button id="openQuizBtn" class="nav-btn highlight-btn">💡 클라우드 퀴즈</button>
+        <div id="authHeaderContainer"></div>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-container">
+    <!-- 섹션 1: 실제 사례 연결 (원클릭 프리셋 버튼) -->
+    <section class="section-card preset-section">
+      <div class="section-header">
+        <div class="section-title-wrap">
+          <span class="step-num">STEP 1</span>
+          <h2>실제 사례 연결 (시나리오 선택)</h2>
+        </div>
+        <p class="section-desc">일상생활에서 접하는 웹서비스 사례를 클릭하면 알맞은 접속자 수, 데이터 용량, 권장 아키텍처가 자동으로 설정됩니다.</p>
+      </div>
+      <div class="preset-grid">
+        <button class="preset-card-btn active-preset" data-preset="class_home">
+          <div class="preset-icon">🏫</div>
+          <div class="preset-info">
+            <div class="preset-title">학급 홈페이지</div>
+            <div class="preset-sub">소규모 트래픽 (동시 50명 / 15GB)</div>
+          </div>
+          <span class="preset-tag">단일 EC2 권장</span>
+        </button>
+
+        <button class="preset-card-btn" data-preset="ticket_rush">
+          <div class="preset-icon">⚡</div>
+          <div class="preset-info">
+            <div class="preset-title">수강신청 / 티켓팅 오픈</div>
+            <div class="preset-sub">급증하는 트래픽 (동시 6.5만명 / 250GB)</div>
+          </div>
+          <span class="preset-tag">ALB + 오토스케일 권장</span>
+        </button>
+
+        <button class="preset-card-btn" data-preset="media_stream">
+          <div class="preset-icon">🎬</div>
+          <div class="preset-info">
+            <div class="preset-title">대용량 미디어 스트리밍</div>
+            <div class="preset-sub">안정적 스토리지 (동시 1.5만명 / 8TB)</div>
+          </div>
+          <span class="preset-tag">서버리스 (Lambda+S3) 권장</span>
+        </button>
+
+        <button class="preset-card-btn" data-preset="black_friday">
+          <div class="preset-icon">🛍️</div>
+          <div class="preset-info">
+            <div class="preset-title">블랙프라이데이 쇼핑몰</div>
+            <div class="preset-sub">DDoS 보안 & 극한 부하 (동시 9.2만명 / 1.5TB)</div>
+          </div>
+          <span class="preset-tag">풀스택 엔터프라이즈</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- 섹션 2: 조작 변수 슬라이더 컨트롤러 -->
+    <section class="section-card slider-section">
+      <div class="section-header">
+        <div class="section-title-wrap">
+          <span class="step-num">STEP 2</span>
+          <h2>조작 변수 설정 (트래픽 & 데이터)</h2>
+        </div>
+        <p class="section-desc">슬라이더를 좌우로 움직여 예상 접속자와 데이터 규모를 자유롭게 조절해 보세요.</p>
+      </div>
+
+      <div class="controls-grid">
+        <!-- 슬라이더 1: 예상 동시 접속자 수 -->
+        <div class="slider-control-card">
+          <div class="slider-meta">
+            <div class="meta-label">
+              <span class="meta-icon">👥</span>
+              <label for="usersSlider">예상 동시 접속자 수</label>
+            </div>
+            <div class="meta-value" id="usersValueDisplay">50 명</div>
+          </div>
+          <input type="range" id="usersSlider" class="modern-slider" min="0" max="100" value="18" aria-label="예상 동시 접속자 수 슬라이더">
+          <div class="slider-ticks">
+            <span>10명</span>
+            <span>1,000명</span>
+            <span>10,000명</span>
+            <span>100,000명</span>
+          </div>
+          <div class="analogy-box" id="usersAnalogy">
+            🏫 1개 학급 학생 규모 (아주 한산함)
+          </div>
+        </div>
+
+        <!-- 슬라이더 2: 데이터 저장 용량 -->
+        <div class="slider-control-card">
+          <div class="slider-meta">
+            <div class="meta-label">
+              <span class="meta-icon">💾</span>
+              <label for="storageSlider">데이터 저장 용량</label>
+            </div>
+            <div class="meta-value" id="storageValueDisplay">15 GB</div>
+          </div>
+          <input type="range" id="storageSlider" class="modern-slider storage-slider" min="0" max="100" value="28" aria-label="데이터 저장 용량 슬라이더">
+          <div class="slider-ticks">
+            <span>1 GB</span>
+            <span>100 GB</span>
+            <span>1 TB</span>
+            <span>10 TB</span>
+          </div>
+          <div class="analogy-box" id="storageAnalogy">
+            📄 교과서 PDF 및 과제 문서 수천 건
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 섹션 3: AWS 파워 툴킷 (아키텍처 확장 컴포넌트 스위치) -->
+    <section class="section-card toolkit-section">
+      <div class="section-header">
+        <div class="section-title-wrap">
+          <span class="step-num">PRO TOOLKIT</span>
+          <h2>AWS 파워 툴킷 (고급 아키텍처 옵션 실습)</h2>
+        </div>
+        <p class="section-desc">현업 엔지니어들이 성능 최적화, 캐싱, 보안 강화를 위해 사용하는 AWS 고급 서비스들을 직접 켜고 끄며 성능 변화를 관찰하세요.</p>
+      </div>
+
+      <div class="toolkit-grid">
+        <!-- 1. CloudFront -->
+        <div class="toolkit-item">
+          <div class="toolkit-info">
+            <div class="toolkit-title-row">
+              <span class="t-icon">⚡</span>
+              <strong>Amazon CloudFront (CDN)</strong>
+            </div>
+            <p class="toolkit-desc">전 세계 엣지 캐시로 원본 서버 부하 65% 절감 및 초고속 로딩</p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="toggleCloudFront">
+            <span class="slider-toggle"></span>
+          </label>
+        </div>
+
+        <!-- 2. ElastiCache -->
+        <div class="toolkit-item">
+          <div class="toolkit-info">
+            <div class="toolkit-title-row">
+              <span class="t-icon">🚀</span>
+              <strong>Amazon ElastiCache (Redis)</strong>
+            </div>
+            <p class="toolkit-desc">자주 찾는 DB 쿼리를 인메모리(RAM)에 캐싱하여 조회 속도 0.005초 달성</p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="toggleElastiCache">
+            <span class="slider-toggle"></span>
+          </label>
+        </div>
+
+        <!-- 3. AWS WAF -->
+        <div class="toolkit-item">
+          <div class="toolkit-info">
+            <div class="toolkit-title-row">
+              <span class="t-icon">🛡️</span>
+              <strong>AWS WAF & Shield (웹 방화벽)</strong>
+            </div>
+            <p class="toolkit-desc">DDoS 대규모 공격 및 악성 해킹 패킷을 사전에 필터링 차단</p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="toggleWAF">
+            <span class="slider-toggle"></span>
+          </label>
+        </div>
+
+        <!-- 4. RDS Multi-AZ -->
+        <div class="toolkit-item">
+          <div class="toolkit-info">
+            <div class="toolkit-title-row">
+              <span class="t-icon">🔁</span>
+              <strong>Amazon RDS Multi-AZ 이중화</strong>
+            </div>
+            <p class="toolkit-desc">다른 가용영역에 대기 DB를 실시간 동기 복제하여 무중단 복구 지원</p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="toggleMultiAZ">
+            <span class="slider-toggle"></span>
+          </label>
+        </div>
+      </div>
+    </section>
+
+    <!-- 섹션 4: 아키텍처 자동 추천 및 탭 -->
+    <section class="section-card arch-recommend-section">
+      <div class="arch-recommend-bar">
+        <div class="arch-status-box">
+          <span class="badge-ai">실시간 최적 추천</span>
+          <h3 id="archTitle">단일 EC2 서버형 아키텍처</h3>
+          <span class="badge-type" id="archBadge">초심자·소규모 추천</span>
+        </div>
+        <p class="arch-summary" id="archSummary">
+          하나의 가상 서버(EC2)에 웹 서버와 데이터베이스를 함께 또는 단순 연결하여 운영하는 기본형 구조
+        </p>
+
+        <!-- 아키텍처 탭 버튼 -->
+        <div class="arch-tabs-wrapper">
+          <button class="arch-tab-btn active" data-arch="single" id="tabSingle">
+            <span class="tab-icon">💻</span>
+            <span class="tab-text">단일 EC2 서버형</span>
+          </button>
+          <button class="arch-tab-btn" data-arch="loadbalancer" id="tabLoadbalancer">
+            <span class="tab-icon">⚖️</span>
+            <span class="tab-text">로드밸런서 + 오토스케일링형</span>
+          </button>
+          <button class="arch-tab-btn" data-arch="serverless" id="tabServerless">
+            <span class="tab-icon">⚡</span>
+            <span class="tab-text">서버리스 (Lambda + S3)형</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 섹션 5: 인터랙티브 클라우드 아키텍처 시각화 & 시뮬레이션 -->
+    <section class="section-card canvas-section">
+      <div class="canvas-header-bar">
+        <div class="canvas-title-group">
+          <h3>클라우드 아키텍처 다이어그램 & 트래픽 흐름</h3>
+          <span class="canvas-sub">노드를 클릭하면 해당 AWS 서비스 상세 도감이 열립니다</span>
+        </div>
+        <div class="canvas-actions">
+          <div class="sim-status-badge" id="simStatusBadge">⚪ 대기 중</div>
+          <button id="simToggleBtn" class="sim-btn pulse-glow">
+            <span>▶️</span> 트래픽 시뮬레이션 시작
+          </button>
+          <!-- 인터랙티브 실험 버튼군 -->
+          <button id="ddosBtn" class="ddos-btn" title="사이버 공격 패킷을 대량 유입시켜 WAF 방패의 차단 여부를 테스트합니다">
+            🚨 DDoS 공격 시뮬레이션
+          </button>
+          <button id="stressBtn" class="stress-btn" title="단일 서버에 8.5만 명을 강제로 쏟아부어 마비 상태를 관찰합니다">
+            🔥 과부하 유발
+          </button>
+        </div>
+      </div>
+
+      <!-- 캔버스 컨테이너 -->
+      <div class="canvas-container" id="canvasWrapper">
+        <canvas id="cloudCanvas"></canvas>
+      </div>
+
+      <!-- 실시간 지표 대시보드 (Telemetry & Metrics) -->
+      <div class="metrics-dashboard">
+        <div class="metric-card">
+          <div class="metric-header">
+            <span class="m-icon">📊</span>
+            <span class="m-label">서버 CPU 부하율</span>
+          </div>
+          <div class="cpu-progress-wrapper">
+            <div class="cpu-progress-bar" id="metricCpuBar" style="width: 25%;"></div>
+          </div>
+          <div class="metric-footer">
+            <span class="metric-val" id="metricCpuText">25%</span>
+            <span class="metric-sub" id="serverCountBadge">EC2 1대 가동 중</span>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-header">
+            <span class="m-icon">⏱️</span>
+            <span class="m-label">평균 응답 속도 (Latency)</span>
+          </div>
+          <div class="metric-big-num">
+            <span class="metric-val good" id="metricLatency">32 ms</span>
+          </div>
+          <div class="metric-footer">
+            <span class="metric-sub" id="latencySubText">쾌적한 웹 서핑 속도</span>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-header">
+            <span class="m-icon">💰</span>
+            <span class="m-label">월 예상 비용 (AWS 견적)</span>
+          </div>
+          <div class="metric-big-num">
+            <span class="metric-val cost-val" id="metricCostUsd">$33</span>
+          </div>
+          <div class="metric-footer">
+            <span class="metric-sub" id="metricCostKrw">(약 ₩44,550)</span>
+            <button class="cost-detail-link" id="viewCostBtn">상세 내역 🔍</button>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-header">
+            <span class="m-icon">🛡️</span>
+            <span class="m-label">시스템 가용성 / 헬스 상태</span>
+          </div>
+          <div class="metric-big-num">
+            <span class="status-tag healthy" id="metricHealth">Healthy (안정적)</span>
+          </div>
+          <div class="metric-footer">
+            <span class="metric-sub" id="healthSubText">SLA 99.99% 고가용성</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 섹션 6: 결과 카드 (3단계 인과관계 리포트) -->
+    <section class="section-card result-section">
+      <div class="section-header">
+        <div class="section-title-wrap">
+          <span class="step-num">STEP 3</span>
+          <h2>추천 아키텍처 심층 분석 리포트</h2>
+        </div>
+        <p class="section-desc">트래픽과 데이터 규모에 따른 최적 아키텍처의 인과관계와 장단점을 비교해 보세요.</p>
+      </div>
+
+      <div class="result-cards-container">
+        <!-- 1단계: 아키텍처 구성 설명 -->
+        <div class="report-card">
+          <div class="report-header">
+            <span class="step-indicator">1단계</span>
+            <h4>아키텍처 구성 설명</h4>
+          </div>
+          <div class="report-body" id="resultStep1">
+            <!-- 동적 주입 -->
+          </div>
+        </div>
+
+        <!-- 2단계: 비용 및 확장성 장단점 -->
+        <div class="report-card">
+          <div class="report-header">
+            <span class="step-indicator">2단계</span>
+            <h4>비용 및 확장성 장단점 비교</h4>
+          </div>
+          <div class="report-body">
+            <div class="pros-cons-grid">
+              <div class="pros-box">
+                <div class="box-title">👍 핵심 장점</div>
+                <ul class="pros-list" id="resultStep2Pros"></ul>
+              </div>
+              <div class="cons-box">
+                <div class="box-title">⚠️ 고려할 한계점</div>
+                <ul class="cons-list" id="resultStep2Cons"></ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3단계: 실제 적합한 서비스 상황 -->
+        <div class="report-card">
+          <div class="report-header">
+            <span class="step-indicator">3단계</span>
+            <h4>실제 적합한 서비스 상황 (인과관계)</h4>
+          </div>
+          <div class="report-body" id="resultStep3">
+            <!-- 동적 주입 -->
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- 푸터 -->
+  <footer class="app-footer">
+    <div class="footer-content">
+      <p>💡 <strong>고등학교 정보 교과 연계:</strong> 클라우드 컴퓨팅 시스템 구성, 확장성(Scalability), 가용성(Availability), 캐싱 및 부하 분산, 보안 및 비용 최적화</p>
+      <p class="copyright">Interactive AWS Cloud Architecture Simulator Pro © 2026 for High School IT Education</p>
+    </div>
+  </footer>
+
+  <!-- 서비스 상세 도감 모달 (전체 11종 서비스 선택 탭 지원) -->
+  <div class="modal-backdrop" id="serviceModal">
+    <div class="modal-window catalog-window">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <span class="modal-category-badge" id="serviceCategory">컴퓨팅</span>
+          <h3 id="serviceModalTitle">Amazon EC2</h3>
+        </div>
+        <button class="modal-close-btn" aria-label="닫기">&times;</button>
+      </div>
+      <div class="modal-body">
+        <!-- 상단 빠른 서비스 선택 뱃지들 -->
+        <div class="service-quick-nav" id="serviceQuickNav"></div>
+
+        <div class="modal-analogy-box" id="serviceAnalogy"></div>
+        <div class="modal-section">
+          <h5>서비스 한 줄 요약</h5>
+          <p id="serviceShortDesc"></p>
+        </div>
+        <div class="modal-section">
+          <h5>기술 상세 및 클라우드에서의 핵심 역할</h5>
+          <p id="serviceDetail"></p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-close-btn btn-secondary">닫기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 클라우드 퀴즈 모달 -->
+  <div class="modal-backdrop" id="quizModal">
+    <div class="modal-window quiz-window">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <span class="modal-category-badge" style="background:#10B981;">학습 평가</span>
+          <h3>💡 고교 정보 클라우드 개념 퀴즈</h3>
+        </div>
+        <button class="modal-close-btn" aria-label="닫기">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="quiz-intro">시뮬레이터로 학습한 클라우드 아키텍처 원리를 퀴즈로 테스트해 보세요!</p>
+        <div id="quizQuestions" class="quiz-questions-list"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-close-btn btn-secondary">완료 및 닫기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 비용 세부 내역 모달 -->
+  <div class="modal-backdrop" id="costBreakdownModal">
+    <div class="modal-window">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <span class="modal-category-badge" style="background:#FF9900; color:#111;">비용 분석</span>
+          <h3>월간 AWS 예상 요금 명세서</h3>
+        </div>
+        <button class="modal-close-btn" aria-label="닫기">&times;</button>
+      </div>
+      <div class="modal-body" id="costBreakdownContent"></div>
+      <div class="modal-footer">
+        <button class="modal-close-btn btn-secondary">확인</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Google GIS 라이브러리 및 스크립트 로드 -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="auth.js"></script>
+  <script src="architecture-data.js"></script>
+  <script src="simulator.js"></script>
+  <script src="app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      if (typeof setupAuthHeader === 'function') {
+        setupAuthHeader('authHeaderContainer');
+      }
+    });
+  </script>
+</body>
+</html>
